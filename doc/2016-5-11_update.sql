@@ -1,0 +1,47 @@
+CREATE TABLE `access_token` (
+	`id` INT(15) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+	`access_token` VARCHAR(200) NULL DEFAULT NULL COMMENT 'token值',
+	`expires_in` INT(6) NULL DEFAULT NULL COMMENT '凭证有限时间',
+	`create_time` TIMESTAMP NULL DEFAULT NULL COMMENT '创建时间',
+	`account` VARCHAR(50) NULL DEFAULT NULL COMMENT '账号',
+	`appid` VARCHAR(50) NULL DEFAULT NULL COMMENT '第三方用户唯一凭证',
+	`secret` VARCHAR(50) NULL DEFAULT NULL COMMENT '第三方用户唯一凭证密钥，即appsecret',
+	`ds_key` VARCHAR(50) NULL DEFAULT NULL COMMENT '对应物流系统key',
+	`industry` VARCHAR(50) NULL DEFAULT NULL COMMENT '行业信息，自定义',
+	PRIMARY KEY (`id`),
+	UNIQUE INDEX `ds_key` (`ds_key`)
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB
+ROW_FORMAT=COMPACT
+AUTO_INCREMENT=1;
+
+
+
+CREATE TABLE `industry_template` (
+	`id` INT(11) NOT NULL AUTO_INCREMENT,
+	`industry` VARCHAR(50) NULL DEFAULT NULL COMMENT '行业信息',
+	`short_id` VARCHAR(100) NULL DEFAULT NULL COMMENT '模板id',
+	PRIMARY KEY (`id`)
+)
+COMMENT='行业模板短id，用于初始化行业推送模板'
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB
+ROW_FORMAT=COMPACT
+AUTO_INCREMENT=1;
+
+
+
+CREATE TABLE `template` (
+	`id` INT(15) NOT NULL AUTO_INCREMENT COMMENT '主键id',
+	`ds_key` VARCHAR(50) NULL DEFAULT NULL,
+	`template_short_id` VARCHAR(50) NULL DEFAULT NULL,
+	`template_id` VARCHAR(100) NULL DEFAULT NULL COMMENT '模板id',
+	`descb` VARCHAR(255) NULL DEFAULT NULL COMMENT '描述',
+	`source` VARCHAR(255) NULL DEFAULT NULL COMMENT 'API,FIX',
+	PRIMARY KEY (`id`)
+)
+COLLATE='utf8_general_ci'
+ENGINE=InnoDB
+ROW_FORMAT=COMPACT
+AUTO_INCREMENT=1;

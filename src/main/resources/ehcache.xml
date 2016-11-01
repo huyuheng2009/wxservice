@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+		 updateCheck="false" monitoring="off" dynamicConfig="false"
+>
+
+	<defaultCache eternal="false" memoryStoreEvictionPolicy="FIFO">
+	</defaultCache>
+
+	<cache name="oauth.token" timeToLiveSeconds="300" logging="true" maxEntriesLocalHeap="65535">
+	</cache>
+	
+	<cache name="pay.OrderParam" timeToLiveSeconds="60" logging="true" maxEntriesLocalHeap="65535">
+	</cache>
+</ehcache>

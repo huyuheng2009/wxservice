@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yogapay.wx.service.WXService">
+     
+	<select id="queryUnifiedOrder" parameterType="string" resultType="com.yogapay.wx.web.UnifiedOrder">
+		SELECT * FROM UnifiedOrder WHERE out_trade_no=#{out_trade_no}
+	</select>
+	
+	<insert id="insertResponse" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO Response
+		(requestId,className,request,response,return_code,return_msg,result_code)
+		VALUES
+		(#{requestId},#{className},#{request},#{res.response},#{res.return_code},#{res.return_msg},#{res.result_code})
+	</insert>
+	
+	<insert id="insertUnifiedOrder" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO UnifiedOrder
+		(out_trade_no,appid,mch_id,nonce_str,body,total_fee,spbill_create_ip,notify_url,trade_type,openid)
+		VALUES
+		(#{out_trade_no},#{appid},#{mch_id},#{nonce_str},#{body},#{total_fee},#{spbill_create_ip},#{notify_url},#{trade_type},#{openid})
+	</insert>
+
+	<update id="updateUnifiedOrderStatus">
+		UPDATE UnifiedOrder SET tracde_success=#{tracde_success}
+		<if test="wxResponse != null">,ret=#{wxResponse}</if>
+		WHERE out_trade_no=#{out_trade_no}
+	</update>
+	
+	<update id="updateUnifiedOrderPrepayId">
+		UPDATE UnifiedOrder SET prepay_id=#{prepay_id}
+		WHERE id=#{id}
+	</update>
+</mapper>

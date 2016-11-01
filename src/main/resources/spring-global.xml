@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		http://www.springframework.org/schema/aop       http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+		http://www.springframework.org/schema/tx        http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+        http://www.springframework.org/schema/util      http://www.springframework.org/schema/util/spring-util-3.2.xsd
+        http://www.springframework.org/schema/context   http://www.springframework.org/schema/context/spring-context-3.2.xsd
+	   " default-lazy-init="false">
+
+	<context:component-scan base-package="com.yogapay.wx.service" />
+
+	<bean id="bundle" class="com.yogapay.core.ResultResourceBundle" />
+
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="configurationProperties">
+			<props>
+				<prop key="logImpl">LOG4J</prop>
+				<prop key="cacheEnabled">false</prop>
+				<prop key="lazyLoadingEnabled">false</prop>
+			</props>
+		</property>
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:mybatis_mapper/*.xml" />
+		<property name="typeAliasesPackage" value="com.yogapay.wx.entity" />
+		<property name="plugins">
+			<list>
+				<bean class="com.yogapay.sql.mybatis.PaginatedInterceptor" />
+				<bean class="com.yogapay.sql.mybatis.ResultSetMapperInterceptor">
+					<constructor-arg>
+						<bean class="com.yogapay.sql.mapping2.GlobalContext">
+							<property name="defaultEntityPackage" value="com.yogapay.wx.entity" />
+						</bean>
+					</constructor-arg>
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="json" class="org.codehaus.jackson.map.ObjectMapper" />
+
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<tx:method name="*_tx" propagation="REQUIRED" rollback-for="Throwable" isolation="SERIALIZABLE" />
+		</tx:attributes>
+	</tx:advice>
+
+	<aop:config proxy-target-class="true">
+		<aop:pointcut id="baseServiceMethods" expression="execution(* com.yogapay.mall.service.*.*(..))" />
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="baseServiceMethods" />
+	</aop:config>
+
+	<bean class="org.springframework.jmx.export.annotation.AnnotationMBeanExporter"/>
+
+	<!--	<bean id="cacheManager" class="net.sf.ehcache.CacheManager" factory-method="newInstance" destroy-method="shutdown">
+		<constructor-arg type="java.net.URL" value="#{config['ehcache.config.url']}" />
+	</bean>-->
+
+	<bean id="oauthCacheService" class="com.yogapay.core.service.CommonCacheService">
+		<property name="name" value="oauth" />
+		<property name="dataSource" ref="dataSource" />
+		<property name="timeToLiveSeconds" value="300" />
+	</bean>
+
+	<bean id="orderCacheService" class="com.yogapay.core.service.CommonCacheService">
+		<property name="name" value="order" />
+		<property name="dataSource" ref="dataSource" />
+		<property name="timeToLiveSeconds" value="60" />
+	</bean>
+
+	<beans profile="development">
+		<bean id="config" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="locations">
+				<array>
+					<value>classpath:config.properties</value>
+					<value>classpath:config_dev.properties</value>
+				</array>
+			</property>
+		</bean>
+		<bean id="dataSource" class="net.sf.log4jdbc.sql.jdbcapi.DataSourceSpy">
+			<constructor-arg>
+				<bean class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+					<constructor-arg value="#{config['c3p0.config.name']}" />
+					<property name="jdbcUrl" value="#{config['c3p0.config.jdbcUrl']}" />
+					<property name="user" value="#{config['c3p0.config.user']}" />
+					<property name="password" value="#{config['c3p0.config.password']}" />
+				</bean>
+			</constructor-arg>
+		</bean>
+	</beans>
+
+	<beans profile="default">
+		<bean id="config" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="locations">
+				<array>
+					<value>classpath:config.properties</value>
+					<value>file:config_pro.properties</value>
+				</array>
+			</property>
+		</bean>
+		<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+			<constructor-arg value="#{config['c3p0.config.name']}" />
+			<property name="jdbcUrl" value="#{config['c3p0.config.jdbcUrl']}" />
+			<property name="user" value="#{config['c3p0.config.user']}" />
+			<property name="password" value="#{config['c3p0.config.password']}" />
+		</bean>
+	</beans>
+</beans>
